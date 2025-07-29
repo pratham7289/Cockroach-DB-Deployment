@@ -1,4 +1,4 @@
-# CockroachDB Fintech Demo
+# CockroachDB Deployment
 
 This repository demonstrates a **CockroachDB deployment** on **RHEL 9.6 using k3s**, with automated tests for high availability, leader election, load balancing, and backup/restore. It showcases **DevOps**, **distributed systems**, and **database** skills through detailed documentation, automation scripts, and a fintech scenario based on the **PayFast** app.
 
