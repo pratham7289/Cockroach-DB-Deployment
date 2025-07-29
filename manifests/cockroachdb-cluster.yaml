@@ -1,0 +1,27 @@
+apiVersion: crdb.cockroachlabs.com/v1alpha1
+kind: CrdbCluster
+metadata:
+  name: cockroachdb
+  namespace: cockroachdb
+spec:
+  dataStore:
+    pvc:
+      spec:
+        accessModes:
+          - ReadWriteOnce
+        resources:
+          requests:
+            storage: 8Gi
+        storageClassName: local-path
+        volumeMode: Filesystem
+  resources:
+    requests:
+      cpu: "500m"
+      memory: "2Gi"
+    limits:
+      cpu: "1000m"
+      memory: "4Gi"
+  cockroachDBVersion: v22.2.10
+  nodes: 3
+  tlsEnabled: false
+  # Note: tlsEnabled is false for simplicity. Enable in production with certificates.
