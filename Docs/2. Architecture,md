@@ -1,0 +1,52 @@
+# CockroachDB Architecture: Core Concepts with PayFast Scenario
+
+CockroachDB’s distributed architecture powers fintech apps like PayFast, a global payment app with 10 million users across Asia (Mumbai, Singapore), Europe (Frankfurt, London), and North America (New York, San Francisco). This document explains key concepts using PayFast to highlight distributed systems.
+
+## PayFast Scenario
+
+PayFast uses a 6-node CockroachDB cluster (2 nodes per region) to handle millions of daily transactions. Users expect fast, reliable, and always-available service, even during server failures. For example, Priya in Mumbai sends $100 to Alex in London, and CockroachDB ensures instant, correct processing with minimal latency.
+
+## Core Concepts
+
+### 1. Nodes and Clusters
+- **Definition**: A **node** is a CockroachDB instance; a **cluster** is multiple nodes working as a single database.
+- **How It Works**:
+  - Nodes store data and handle queries, communicating via the gossip protocol.
+  - Clients connect to any node (gateway) to access the cluster.
+  - Scales by adding nodes (horizontal scaling).
+- **PayFast Example**: Priya’s payment hits the Mumbai node, which coordinates with others. Adding a node scales the cluster for growth.
+- **Latency Solution**: Geo-partitioning keeps Priya’s data in Asia for fast access.
+
+### 2. Ranges and Replication
+- **Definition**: Data is split into **ranges** (64MB key-value pair chunks), replicated across 3 nodes by default.
+- **How It Works**:
+  - Ranges split when they grow too large, balancing load.
+  - Replicas ensure data survives node failures.
+- **PayFast Example**: Priya’s transaction is in a Mumbai range, replicated to Singapore and Frankfurt. If Mumbai fails, Singapore serves the data.
+
+### 3. Leaseholders and Raft Leaders
+- **Definition**: Each range has a **leaseholder** (handles reads/writes) and **Raft leader** (coordinates replication, unified with leaseholder since v25.2).
+- **How It Works**:
+  - Raft ensures a majority (2/3) of replicas agree on writes via consensus.
+  - If a leaseholder fails, another node takes over.
+- **PayFast Example**: Mumbai (leaseholder) processes Priya’s payment, using Raft to confirm with Singapore and Frankfurt.
+
+### 4. Gossip Protocol
+- **Definition**: Nodes share cluster health, capacity, and range locations via peer-to-peer messages.
+- **How It Works**:
+  - Ensures nodes know which are alive and where data resides.
+  - Supports rebalancing and failure detection.
+- **PayFast Example**: Gossip helps rebalance ranges if Mumbai is overloaded or New York fails.
+
+## Visuals
+- See [diagrams/cluster-architecture.png](diagrams/cluster-architecture.png) for node and replication layout.
+- See [diagrams/raft-consensus.png](diagrams/raft-consensus.png) for Raft leader election flow.
+
+## Summary
+1. **Nodes/Clusters**: Form a scalable, distributed database.
+2. **Ranges/Replication**: Split and copy data for scalability and HA.
+3. **Leaseholders/Raft**: Ensure efficient, consistent reads/writes.
+4. **Gossip**: Coordinates nodes for resilience and load balancing.
+5. **PayFast Benefit**: Fast, reliable, low-latency transactions globally.
+
+CockroachDB’s architecture ensures PayFast remains fast, consistent, and available, showcasing distributed systems in action.
